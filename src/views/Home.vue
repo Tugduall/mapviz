@@ -42,6 +42,17 @@
     <Card class="t-card mb-2">
       <template #title>
         Waypoints
+
+        <Button class="p-button-rounded p-button-text" icon="pi pi-question-circle" style="float: right;" type="button"
+                @click="toggle"/>
+        <OverlayPanel ref="op" :dismissable="true" :showCloseIcon="true">
+          <p class="font-bold text-center">Accepted format of coordinates</p>
+          <p><span class="font-bold">Separator :</span> commas, semi-colons, space </p>
+          <p class="font-bold">Sample :</p>
+          <p>46.961890, -2.886923</p>
+          <p>46.961890; -2.886923</p>
+          <p>46.961890 -2.886923</p>
+        </OverlayPanel>
       </template>
       <template #content>
         <div class="grid">
@@ -52,7 +63,8 @@
           <div class="col-6">
             <p class="m-0 mb-1 font-medium">Color</p>
             <div class="flex flex-row flex-nowrap align-items-center">
-              <ColorPicker v-model="currentWaypoints.color" class="mr-1"/>
+              <ColorPicker :modelValue="currentWaypoints.color" class="mr-1"
+                           @update:modelValue="currentWaypoints.color = $event; createFeatureGroup(currentWaypoints)"/>
               <InputText v-model="currentWaypoints.color" type="text"/>
             </div>
           </div>
@@ -156,11 +168,23 @@ import InputNumber from "primevue/inputnumber";
 import Accordion from "primevue/accordion";
 import AccordionTab from "primevue/accordiontab";
 import Toast from "primevue/toast";
+import OverlayPanel from "primevue/overlaypanel";
 
 export default {
   name: "Home",
   components: {
-    Menubar, InputText, ColorPicker, Button, Card, Textarea, Dropdown, InputNumber, Accordion, AccordionTab, Toast,
+    Menubar,
+    InputText,
+    ColorPicker,
+    Button,
+    Card,
+    Textarea,
+    Dropdown,
+    InputNumber,
+    Accordion,
+    AccordionTab,
+    Toast,
+    OverlayPanel,
   },
   data() {
     return {
@@ -213,27 +237,31 @@ export default {
       },
     }
   },
-  computed: {
-    formatLatLngs(evt) {
-      console.log(evt)
-      console.log(evt.target.value)
-      return '$'
-    }
-  },
   methods: {
     setupLeafletMap: function () {
       this.map = L.map("mapContainer").setView([51.505, -0.09], 4);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(this.map);
     },
 
+    toggle(event) {
+      this.$refs.op.toggle(event);
+    },
+
     createFeatureGroup(current) {
+      if (current.latLngs.length === 0) {
+        return
+      }
+
       if (current.featureGroup != null) {
         this.map.removeLayer(current.featureGroup)
       }
       current.featureGroup = L.featureGroup().addTo(this.map)
+      current.markers = []
 
-      current.markers.forEach(m => {
-        m.addTo(current.featureGroup)
+      current.latLngs.forEach(ll => {
+        let marker = L.circleMarker(ll, {color: '#' + current.color})
+        current.markers.push(marker)
+        marker.addTo(current.featureGroup)
       });
 
       if (current.markers.length > 1) {
@@ -277,7 +305,6 @@ export default {
         let latLng = [Number(strCoordinates[0]), Number(strCoordinates[1])]
         this.currentWaypoints.formattedLatLngs += `${strCoordinates[0]}, ${strCoordinates[1]}`
         this.currentWaypoints.latLngs.push(latLng);
-        this.currentWaypoints.markers.push(L.circleMarker(latLng, {color: '#' + this.currentWaypoints.color}))
       });
 
       this.createFeatureGroup(this.currentWaypoints)
@@ -285,7 +312,7 @@ export default {
 
     saveWaypoints() {
       if (this.currentWaypoints.coordinates === "" || this.currentWaypoints.name === "") {
-        alert("Empty field")
+        alert("You must enter a name to save waypoints")
       } else {
         this.savedWaypoints.push(this.currentWaypoints);
         this.waypointInputValue = "";
@@ -325,8 +352,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-::v-deep .p-accordion-tab {
-  margin-bottom: 0.5rem;
+::v-deep {
+  .p-accordion-tab {
+    margin-bottom: 0.5rem;
+  }
+}
+
+.p-overlaypanel-close .p-link {
+  z-index: 999 !important;
 }
 
 #menu-bar {
