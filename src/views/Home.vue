@@ -17,8 +17,8 @@
         <input name="cmd" type="hidden" value="_donations">
 
         <!-- Specify details about the contribution -->
-        <input name="item_name" type="hidden" value="Mapool development">
-        <input name="item_number" type="hidden" value="Help us to develop fancy new feature for Mapool">
+        <input name="item_name" type="hidden" value="Mapviz development">
+        <input name="item_number" type="hidden" value="Help us to develop fancy new feature for Mapviz">
         <input name="currency_code" type="hidden" value="EUR">
 
         <!-- Display the payment button. -->
