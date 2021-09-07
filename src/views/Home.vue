@@ -72,11 +72,6 @@
             <Textarea v-model="waypointInputValue" rows="6" @change="formatWaypoints"/>
           </div>
         </div>
-        <Button :disabled="waypointInputValue === ''" class="p-button-sm p-button-outlined p-button-help mr-1"
-                icon="pi pi-map-marker"
-                iconPos="left"
-                label="View waypoints"
-                @click="formatWaypoints"/>
         <Button :disabled="waypointInputValue === ''" class="p-button-sm p-button-outlined" icon="pi pi-check"
                 iconPos="left" label="Save Waypoints"
                 @click="saveWaypoints"/>
@@ -92,16 +87,24 @@
         <div class="saved-waypoints-list">
           <div v-for="(waypoint, index) in savedWaypoints" :key="'swp_'+index"
                class="flex flex-row flex-nowrap align-items-center justify-content-between mb-2">
-            <div class="col-4 p-0">
+            <div class="w-5">
               <p class="capitalize m-0">{{ waypoint.name }}</p>
             </div>
-            <div class="col-4 p-0">
-              <!--TODO-->
-              <p class="p-text-wrap">{{ waypoint.formattedLatLngs }}</p>
-            </div>
-            <div class="col-4 p-0 flex flex-row justify-content-around align-items-center">
+            <div class="w-7 flex flex-row justify-content-end align-items-center">
+              <Button v-tooltip="'View waypoint list'" class="p-button-sm p-button-outlined mr-1"
+                      @click="displayWaypointsDialog = true">
+                Waypoints
+              </Button>
+              <Dialog v-model:visible="displayWaypointsDialog" :modal="true" header="Waypoints"
+                      style="max-width: 40vw; min-width: 20vw;">
+                <div class="waypoint-list">
+                  <template v-for="(wp, index) in waypoint.latLngs" :key="'wp_'+index">
+                    <p class="m-0 mb-1">{{ wp[0] }}, {{ wp[1] }}</p>
+                  </template>
+                </div>
+              </Dialog>
               <Dropdown v-if="waypoint.markers.length > 1" v-model="waypoint.shape" :options="shapes" optionLabel="name"
-                        @change="createFeatureGroup(waypoint)">
+                        @change="createFeatureGroup(waypoint)" class="mr-1">
                 <template #value="shape">
                   <div class="flex flex-row justify-content-center" v-html="shape.value.icon"></div>
                 </template>
@@ -109,8 +112,9 @@
                   <div class="flex flex-row justify-content-center" v-html="shape.option.icon"></div>
                 </template>
               </Dropdown>
-              <Button class="p-button-sm p-button-danger p-button-outlined" icon="pi pi-trash" iconPos="left"
-                      @click="deleteSavedWaypoint(index)"/>
+              <Button v-tooltip.left="'Delete saved waypoints'" class="p-button-sm p-button-danger p-button-outlined"
+                      icon="pi pi-trash"
+                      iconPos="left" @click="deleteSavedWaypoint(index)"/>
             </div>
           </div>
         </div>
@@ -169,6 +173,7 @@ import Accordion from "primevue/accordion";
 import AccordionTab from "primevue/accordiontab";
 import Toast from "primevue/toast";
 import OverlayPanel from "primevue/overlaypanel";
+import Dialog from "primevue/dialog";
 
 export default {
   name: "Home",
@@ -185,9 +190,11 @@ export default {
     AccordionTab,
     Toast,
     OverlayPanel,
+    Dialog,
   },
   data() {
     return {
+      displayWaypointsDialog: false,
       converter: {
         ddInputValue: null,
         ddToDmsResult: null,
@@ -238,8 +245,9 @@ export default {
     }
   },
   methods: {
+
     setupLeafletMap: function () {
-      this.map = L.map("mapContainer").setView([51.505, -0.09], 4);
+      this.map = L.map("mapContainer", {center: [51, 0], zoom: 4});
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(this.map);
     },
 
@@ -301,7 +309,7 @@ export default {
         if (index > 0) {
           this.currentWaypoints.formattedLatLngs += ' / '
         }
-        let strCoordinates = c.split(/[\s,; ]+/);
+        let strCoordinates = c.split(/[\s,; \r]+/);
         let latLng = [Number(strCoordinates[0]), Number(strCoordinates[1])]
         this.currentWaypoints.formattedLatLngs += `${strCoordinates[0]}, ${strCoordinates[1]}`
         this.currentWaypoints.latLngs.push(latLng);
@@ -311,9 +319,14 @@ export default {
     },
 
     saveWaypoints() {
-      if (this.currentWaypoints.coordinates === "" || this.currentWaypoints.name === "") {
-        alert("You must enter a name to save waypoints")
+      if (this.currentWaypoints.coordinates === "") {
+        alert("You must enter waypoints to save")
       } else {
+
+        if (this.currentWaypoints.name === "") {
+          this.currentWaypoints.name = 'Route ' + (this.savedWaypoints.length + 1)
+        }
+
         this.savedWaypoints.push(this.currentWaypoints);
         this.waypointInputValue = "";
         this.currentWaypoints = {
@@ -384,6 +397,28 @@ export default {
   width: 100vw;
   height: 95vh;
 }
+
+.waypoint-list, .saved-waypoints-list {
+  max-height: 30vh;
+  overflow-y: auto;
+}
+
+/*::-webkit-scrollbar {
+  width: 5px;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d7d7d7;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9d9d9d;
+}*/
 
 
 </style>
