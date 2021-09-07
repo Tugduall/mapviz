@@ -7,7 +7,6 @@
     </template>
     <template #end>
       <div class="flex flex-row">
-        <Button class="p-button-sm p-button-text mr-1">Converter</Button>
         <!-- PayPal Donate -->
         <form action="https://www.paypal.com/cgi-bin/webscr" class="flex align-items-center justify-content-center"
               method="post">
