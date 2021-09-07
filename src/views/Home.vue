@@ -6,29 +6,32 @@
       <img id="logo" alt="Mapool logo" src="../assets/mapool_logo_3.png">
     </template>
     <template #end>
-      <!-- PayPal Donate -->
-      <form action="https://www.paypal.com/cgi-bin/webscr" class="flex align-items-center justify-content-center"
-            method="post">
+      <div class="flex flex-row">
+        <Button class="p-button-sm p-button-text mr-1">Converter</Button>
+        <!-- PayPal Donate -->
+        <form action="https://www.paypal.com/cgi-bin/webscr" class="flex align-items-center justify-content-center"
+              method="post">
 
-        <!-- Identify your business so that you can collect the payments. -->
-        <input name="business" type="hidden" value="launay.tug@gmail.com">
+          <!-- Identify your business so that you can collect the payments. -->
+          <input name="business" type="hidden" value="launay.tug@gmail.com">
 
-        <!-- Specify a Donate button. -->
-        <input name="cmd" type="hidden" value="_donations">
+          <!-- Specify a Donate button. -->
+          <input name="cmd" type="hidden" value="_donations">
 
-        <!-- Specify details about the contribution -->
-        <input name="item_name" type="hidden" value="Mapviz development">
-        <input name="item_number" type="hidden" value="Help us to develop fancy new feature for Mapviz">
-        <input name="currency_code" type="hidden" value="EUR">
+          <!-- Specify details about the contribution -->
+          <input name="item_name" type="hidden" value="Mapviz development">
+          <input name="item_number" type="hidden" value="Help us to develop fancy new feature for Mapviz">
+          <input name="currency_code" type="hidden" value="EUR">
 
-        <!-- Display the payment button. -->
-        <input alt="Donate" name="submit"
-               src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif"
-               type="image">
-        <img alt="" height="1" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif"
-             width="1">
+          <!-- Display the payment button. -->
+          <input alt="Donate" name="submit"
+                 src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif"
+                 type="image">
+          <img alt="" height="1" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif"
+               width="1">
 
-      </form>
+        </form>
+      </div>
     </template>
   </Menubar>
 
@@ -47,7 +50,7 @@
                 @click="toggle"/>
         <OverlayPanel ref="op" :dismissable="true" :showCloseIcon="true">
           <p class="font-bold text-center">Accepted format of coordinates</p>
-          <p><span class="font-bold">Separator :</span> commas, semi-colons, space </p>
+          <p><span class="font-bold">Separator :</span> commas, semi-colons, space or tabulation </p>
           <p class="font-bold">Sample :</p>
           <p>46.961890, -2.886923</p>
           <p>46.961890; -2.886923</p>
@@ -103,8 +106,8 @@
                   </template>
                 </div>
               </Dialog>
-              <Dropdown v-if="waypoint.markers.length > 1" v-model="waypoint.shape" :options="shapes" optionLabel="name"
-                        @change="createFeatureGroup(waypoint)" class="mr-1">
+              <Dropdown v-if="waypoint.markers.length > 1" v-model="waypoint.shape" :options="shapes" class="mr-1"
+                        optionLabel="name" @change="createFeatureGroup(waypoint)">
                 <template #value="shape">
                   <div class="flex flex-row justify-content-center" v-html="shape.value.icon"></div>
                 </template>
