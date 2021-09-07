@@ -87,10 +87,10 @@
         <div class="saved-waypoints-list">
           <div v-for="(waypoint, index) in savedWaypoints" :key="'swp_'+index"
                class="flex flex-row flex-nowrap align-items-center justify-content-between mb-2">
-            <div class="w-5">
+            <div class="w-4">
               <p class="capitalize m-0">{{ waypoint.name }}</p>
             </div>
-            <div class="w-7 flex flex-row justify-content-end align-items-center">
+            <div class="w-8 flex flex-row justify-content-end align-items-center">
               <Button v-tooltip="'View waypoint list'" class="p-button-sm p-button-outlined mr-1"
                       @click="displayWaypointsDialog = true">
                 Waypoints
@@ -112,6 +112,8 @@
                   <div class="flex flex-row justify-content-center" v-html="shape.option.icon"></div>
                 </template>
               </Dropdown>
+              <ColorPicker :modelValue="waypoint.color" class="mr-1"
+                           @update:modelValue="waypoint.color = $event; createFeatureGroup(waypoint)"/>
               <Button v-tooltip.left="'Delete saved waypoints'" class="p-button-sm p-button-danger p-button-outlined"
                       icon="pi pi-trash"
                       iconPos="left" @click="deleteSavedWaypoint(index)"/>
@@ -295,6 +297,7 @@ export default {
       }
 
       this.map.fitBounds(current.featureGroup.getBounds(), {padding: [100, 100]});
+      this.map.setZoom(4)
     },
 
     formatWaypoints(evt) {
@@ -403,7 +406,7 @@ export default {
   overflow-y: auto;
 }
 
-/*::-webkit-scrollbar {
+::-webkit-scrollbar {
   width: 5px;
   border-radius: 4px;
 }
@@ -418,7 +421,7 @@ export default {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #9d9d9d;
-}*/
+}
 
 
 </style>
