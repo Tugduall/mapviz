@@ -58,17 +58,29 @@
       </template>
       <template #content>
         <div class="grid">
-          <div class="col-6">
+          <div class="col-5">
             <p class="m-0 mb-1 font-medium">Name</p>
             <InputText v-model="currentWaypoints.name" required type="text"/>
           </div>
-          <div class="col-6">
+          <div class="col-4">
             <p class="m-0 mb-1 font-medium">Color</p>
             <div class="flex flex-row flex-nowrap align-items-center">
               <ColorPicker :modelValue="currentWaypoints.color" class="mr-1"
                            @update:modelValue="currentWaypoints.color = $event; createFeatureGroup(currentWaypoints)"/>
               <InputText v-model="currentWaypoints.color" type="text"/>
             </div>
+          </div>
+          <div class="col-3">
+            <p class="m-0 mb-1 font-medium">Shape</p>
+              <Dropdown v-model="currentWaypoints.shape" :options="shapes" class="mr-1"
+                        optionLabel="name" @change="createFeatureGroup(currentWaypoints)">
+                <template #value="shape">
+                  <div class="flex flex-row justify-content-center" v-html="shape.value.icon"></div>
+                </template>
+                <template #option="shape">
+                  <div class="flex flex-row justify-content-center" v-html="shape.option.icon"></div>
+                </template>
+              </Dropdown>
           </div>
           <div class="col-12">
             <Textarea v-model="waypointInputValue" rows="6" @change="formatWaypoints"/>
@@ -89,10 +101,8 @@
         <div class="saved-waypoints-list">
           <div v-for="(waypoint, index) in savedWaypoints" :key="'swp_'+index"
                class="flex flex-row flex-nowrap align-items-center justify-content-between mb-2">
-            <div class="w-4">
-              <p class="capitalize m-0">{{ waypoint.name }}</p>
-            </div>
-            <div class="w-8 flex flex-row justify-content-end align-items-center">
+            <p class="capitalize m-0">{{ waypoint.name }}</p>
+            <div class="flex flex-row justify-content-end align-items-center">
               <Button v-tooltip="'View waypoint list'" class="p-button-sm p-button-outlined mr-1"
                       @click="displayWaypointsDialog = true">
                 Waypoints
@@ -116,6 +126,9 @@
               </Dropdown>
               <ColorPicker :modelValue="waypoint.color" class="mr-1"
                            @update:modelValue="waypoint.color = $event; createFeatureGroup(waypoint)"/>
+              <Button v-tooltip.left="'Hide / Show'" class="p-button-outlined p-button-sm mr-1 p-button-secondary"
+                      icon="pi pi-eye"
+                      @click="toggleVisibility(waypoint)"></Button>
               <Button v-tooltip.left="'Delete saved waypoints'" class="p-button-sm p-button-danger p-button-outlined"
                       icon="pi pi-trash"
                       iconPos="left" @click="deleteSavedWaypoint(index)"/>
@@ -257,6 +270,15 @@ export default {
 
     toggle(event) {
       this.$refs.op.toggle(event);
+    },
+
+    toggleVisibility(current) {
+      current.visible = !current.visible
+      if (current.featureGroup != null && !current.visible) {
+        this.map.removeLayer(current.featureGroup)
+      } else {
+        this.createFeatureGroup(current)
+      }
     },
 
     createFeatureGroup(current) {
